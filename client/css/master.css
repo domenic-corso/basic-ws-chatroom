@@ -1,0 +1,11 @@
+body {
+    margin-top: 40px;
+}
+
+.panel {
+    display: none;
+}
+
+.panel--active {
+    display: block;
+}

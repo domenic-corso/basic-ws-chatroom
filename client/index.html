@@ -4,24 +4,44 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Chat Room</title>
+        <title>Chatroom with WebSockets</title>
+        <link rel="stylesheet" href="http://getskeleton.com/dist/css/normalize.css">
+        <link rel="stylesheet" href="http://getskeleton.com/dist/css/skeleton.css">
+        <link rel="stylesheet" href="/css/master.css">
     </head>
     <body>
-        <h1>Chat Room</h1>
+        <div class="container panel" data-panel-name="register">
+            <div class="row">
+                <div class="eight columns">
+                    <h3>Chatroom with Websockets</h3>
+                    <h5>Register yourself below</h5>
+                    
+                    <!-- Form -->
+                    <label for="cwsName">Name</label>
+                    <input type="text" id="cwsName" class="u-full-width" placeholder="Enter your name">
+                    <br>
+                    <label for="cwsColor">Choose Your Color</label>
+                    <input type="color" id="cwsColor" class="u-full-width">
+                    <button class="button-primary u-pull-right" id="btnStartChatting">Start Chatting</button>
+                </div>
+            </div>
+        </div>
+        <div class="container panel" data-panel-name="roomList">
+            <h5>Room List</h5>
+            <table class="u-full-width">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Message Count</th>
+                        <th>Created By</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyRoomList">
 
-        <script>
-            const ws = new WebSocket('ws://localhost:5000');
-            ws.onmessage = console.log;
-
-            function sendMsg() {
-                const obj = {
-                    name: "Dom",
-                    age: 22
-                };
-                
-                console.log(`Sending`, obj);
-                ws.send(JSON.stringify(obj));
-            }
-        </script>
+                </tbody>
+            </table>
+        </div>
+        <script src="/js/main.js"></script>
     </body>
 </html>

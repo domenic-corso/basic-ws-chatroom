@@ -30,13 +30,16 @@ class RoomHelper extends Helper {
     getAll () {
         return new Promise((resolve, reject) => {
             this.mysqlConnection.query(`
-                SELECT Room_ID
-                    ,Name
-                    ,Description
-                    ,Created_By
-                    ,Created_At
-                FROM room
-                ORDER BY Room_ID DESC
+            SELECT r.Room_ID
+                ,Name
+                ,Description
+                ,r.Created_By
+                ,r.Created_At
+                ,COUNT(m.Message_ID) AS Message_Count
+            FROM room r
+            LEFT JOIN message m ON m.Room_ID = r.Room_ID
+            GROUP BY r.Room_ID
+            ORDER BY Room_ID DESC
             `, (err, res) => {
                 if (err) {
                     reject(err);
