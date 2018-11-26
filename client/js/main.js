@@ -4,7 +4,8 @@ const App = {
         btnStartChatting: null,
         inpName: null,
         inpColor: null,
-        roomList: null
+        roomList: null,
+        messageList: null
     },
 
     currentRoom: 0,
@@ -17,19 +18,24 @@ const App = {
         this.e.inpColor = document.getElementById('cwsColor');
 
         this.e.roomList = document.getElementById('tbodyRoomList');
+        this.e.messageList = document.getElementById('messageList');
 
         // Start Chatting - Button
         this.e.btnStartChatting = document.getElementById('btnStartChatting');
         this.e.btnStartChatting.addEventListener('click', e => {
-            this.ws.send(JSON.stringify({
-                command: 'SET_DETAILS',
-                data: {
-                    name: this.e.inpName.value,
-                    color: this.e.inpColor.value
-                }
-            }));
+            if (this.e.inpName.value !== '') {
+                this.ws.send(JSON.stringify({
+                    command: 'SET_DETAILS',
+                    data: {
+                        name: this.e.inpName.value,
+                        color: this.e.inpColor.value
+                    }
+                }));
 
-            this.listRooms();
+                this.listRooms();
+            } else {
+                document.getElementById('inpNameError').textContent = 'Name is required'
+            }
         });
 
         this.ws.onmessage = ({data}) => {
@@ -38,8 +44,11 @@ const App = {
 
                 switch (msgObj.command) {
                     case 'ROOMS':
-                    this.populateRooms(msgObj.data.rooms);
-                    break;
+                        this.populateRooms(msgObj.data.rooms);
+                        break;
+                    case 'MESSAGES':
+                        this.populateMessages(msgObj.data.room, msgObj.data.messages);
+                        break;
                 }
 
             } catch (e) {
@@ -58,25 +67,90 @@ const App = {
         }));
     },
 
+    listMessages(roomId) {
+        PanelSwitcher.open('messageList');
+
+        document.getElementById('closeMessageList').addEventListener('click', e => {
+            PanelSwitcher.open('roomList');
+        });
+
+        this.ws.send(JSON.stringify({
+            command: 'REQUEST_MESSAGES',
+            data: { roomId }
+        }));
+    },
+
     populateRooms (rooms) {
         while (this.e.roomList.firstElementChild) {
             this.e.roomList.removeChild(this.e.roomList.firstElementChild);
         }
 
         rooms.forEach(room => {
-           const row = document.createElement('tr');
+            const row = document.createElement('tr');
 
-           row.addEventListener('click', () => {
-               this.currentRoom = room.Room_ID;
-           });
-           
-           ['Name', 'Description', 'Message_Count', 'Created_By'].forEach(key => {
-               const td = document.createElement('td');
-               td.textContent = room[key];
-               row.appendChild(td);
-           });
+            row.addEventListener('click', () => {
+                this.currentRoom = room.Room_ID;
+                this.listMessages(room.Room_ID);
 
-           this.e.roomList.appendChild(row);
+            });
+            
+            ['Name', 'Description', 'Message_Count', 'Created_By'].forEach(key => {
+                const td = document.createElement('td');
+                td.textContent = room[key];
+                row.appendChild(td);
+            });
+
+            this.e.roomList.appendChild(row);
+        });
+    },
+
+    populateMessages(room, messages) {
+        while (this.e.messageList.firstElementChild) {
+            this.e.messageList.removeChild(this.e.messageList.firstElementChild);
+        }
+
+        document.getElementById('roomName').textContent = `Room: ${room.Name}`;
+
+        messages.forEach(message => {
+            // Message List Item
+            let li = document.createElement('li');
+            li.className = 'message';
+
+            // Message Header
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message__header';
+
+            ['Created_By', 'User_Color', 'Created_At'].forEach(
+                key => {
+                    const span = document.createElement('span');
+
+                    if (key === 'User_Color') {
+                        span.style.backgroundColor = message[key];
+                    } else {
+                        span.textContent = message[key];
+                    }
+                
+                    // Set classname based on key
+                    span.className = key.toLowerCase().replace('_', '-');
+
+                    messageHeader.appendChild(span);
+                }
+            );
+
+            // Message Content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message__content';
+
+            const messageBody = document.createElement('span')
+            messageBody.textContent = message.Body;
+
+            messageContent.appendChild(messageBody);
+
+            // Append to message list item and to message list
+            li.appendChild(messageHeader);
+            li.appendChild(messageContent);
+
+            this.e.messageList.appendChild(li);
         });
     }
 }

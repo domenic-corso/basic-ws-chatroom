@@ -32,15 +32,18 @@ class User {
                         });
                         break;
                     case 'REQUEST_MESSAGES':
-                        this.messageHelper.getAll(msgObj.data.roomId).then(messages => {
-                            this.ws.send(JSON.stringify({
-                                command: 'MESSAGES',
-                                data: {
-                                    messages
-                                }
-                            }))
+                        this.roomHelper.getById(msgObj.data.roomId).then(room => {
+                            this.messageHelper.getAll(msgObj.data.roomId).then(messages => {
+                                this.ws.send(JSON.stringify({
+                                    command: 'MESSAGES',
+                                    data: {
+                                        room,
+                                        messages
+                                    }
+                                }))
+                            });        
                         });
-                        break;
+                        break;  
                 }
 
             } catch (e) {

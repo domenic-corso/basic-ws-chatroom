@@ -27,6 +27,26 @@ class RoomHelper extends Helper {
         });
     }
 
+    getById(roomId) {
+        return new Promise((resolve, reject) => {
+            this.mysqlConnection.query(`
+            SELECT Room_ID
+                ,Name
+                ,Description
+                ,Created_By
+                ,Created_At
+            FROM room
+            WHERE Room_ID = ?
+            `, [roomId], (err, res) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(Object.assign({}, res[0]));
+                })
+        });
+    }
+
     getAll () {
         return new Promise((resolve, reject) => {
             this.mysqlConnection.query(`
