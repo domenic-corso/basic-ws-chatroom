@@ -17,6 +17,7 @@ You should see a success message on successful connection to database
 ```bash
     cd server
     npm install
+    npm start
 ```
 
 ### Run the client (Development)
