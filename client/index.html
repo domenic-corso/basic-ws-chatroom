@@ -1,90 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Chatroom with WebSockets</title>
-    <link
-      rel="stylesheet"
-      href="http://getskeleton.com/dist/css/normalize.css"
-    />
-    <link
-      rel="stylesheet"
-      href="http://getskeleton.com/dist/css/skeleton.css"
-    />
-    <link rel="stylesheet" href="/css/master.css" />
-  </head>
-  <body>
-    <div class="container panel" data-panel-name="register">
-      <div class="row">
-        <div class="eight columns">
-          <h3>Chatroom with Websockets</h3>
-          <h5>Register yourself below</h5>
-          <span id="inpNameError" class="error"></span>
-          <!-- Form -->
-          <label for="cwsName">Name</label>
-          <input
-            type="text"
-            id="cwsName"
-            class="u-full-width"
-            placeholder="Enter your name"
-          />
-          <br />
-          <label for="cwsColor">Choose Your Color</label>
-          <input type="color" id="cwsColor" class="u-full-width" />
-          <button class="button-primary u-pull-right" id="btnStartChatting">
-            Start Chatting
-          </button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Chatroom with WebSockets</title>
+        <link
+            rel="stylesheet"
+            href="http://getskeleton.com/dist/css/normalize.css"
+        />
+        <link
+            rel="stylesheet"
+            href="http://getskeleton.com/dist/css/skeleton.css"
+        />
+        <link rel="stylesheet" href="/css/master.css" />
+    </head>
+    <body>
+        <div class="container panel" data-panel-name="register">
+            <div class="row">
+                <div class="eight columns">
+                    <h3>Chatroom with Websockets</h3>
+                    <h5>Register yourself below</h5>
+                    <span id="inpNameError" class="error"></span>
+                    <!-- Form -->
+                    <label for="cwsName">Name</label>
+                    <input
+                        type="text"
+                        id="cwsName"
+                        class="u-full-width"
+                        placeholder="Enter your name"
+                    />
+                    <br />
+                    <label for="cwsColor">Choose Your Color</label>
+                    <input type="color" id="cwsColor" class="u-full-width" />
+                    <button
+                        class="button-primary u-pull-right"
+                        id="btnStartChatting"
+                    >
+                        Start Chatting
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="container panel" data-panel-name="roomList">
-      <h5>Room List</h5>
-      <table class="u-full-width">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Message Count</th>
-            <th>Created By</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyRoomList"></tbody>
-      </table>
-    </div>
-    <div class="container panel" data-panel-name="messageList">
-      <div class="row">
-        <div class="flex twelve columns">
-          <h5 id="roomName" class="u-flex-right"></h5>
-          <span id="closeMessageList" class="button">Back</span>
+        <div class="container panel" data-panel-name="roomList">
+            <h5>Room List</h5>
+            <table class="u-full-width">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Message Count</th>
+                        <th>Created By</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyRoomList"></tbody>
+            </table>
         </div>
-      </div>
-      <div class="row">
-        <div class="twelve columns message-container">
-          <ul id="messageList" class="message-container__list"></ul>
+        <div class="container panel" data-panel-name="messageList">
+            <div class="row">
+                <div class="flex twelve columns">
+                    <h5 id="roomName" class="u-flex-right"></h5>
+                    <span id="closeMessageList" class="button">Back</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns message-container">
+                    <ul id="messageList" class="message-container__list"></ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="nine columns">
+                    <input
+                        type="text"
+                        id="messageInput"
+                        class="u-full-width"
+                        placeholder="Enter message"
+                    />
+                </div>
+                <div class="three columns">
+                    <button
+                        type="submit"
+                        class="button-primary u-full-width"
+                        id="btnSendMessage"
+                    >
+                        Send
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="nine columns">
-          <input
-            type="text"
-            id="messageInput"
-            class="u-full-width"
-            placeholder="Enter message"
-          />
-        </div>
-        <div class="three columns">
-          <button
-            type="submit"
-            class="button-primary u-full-width"
-            id="btnSendMessage"
-          >
-            Send
-          </button>
-        </div>
-      </div>
-    </div>
-    <script src="/js/main.js"></script>
-  </body>
+        <script src="https://momentjs.com/downloads/moment.min.js"></script>
+        <script src="/js/main.js"></script>
+    </body>
 </html>

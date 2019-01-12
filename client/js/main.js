@@ -4,6 +4,8 @@ const App = {
         btnStartChatting: null,
         inpName: null,
         inpColor: null,
+        messageInp: null,
+        btnSendMessage: null,
         roomList: null,
         messageList: null
     },
@@ -38,6 +40,13 @@ const App = {
             }
         });
 
+        // Button Send Message
+        this.e.btnSendMessage = document.getElementById("btnSendMessage");
+        this.e.btnSendMessage.addEventListener('click', this.sendMessage.bind(this));
+
+        // Message Input
+        this.e.messageInp = document.getElementById('messageInput');
+
         this.ws.onmessage = ({data}) => {
             try {
                 const msgObj = JSON.parse(data);
@@ -49,6 +58,9 @@ const App = {
                     case 'MESSAGES':
                         this.populateMessages(msgObj.data.room, msgObj.data.messages);
                         break;
+                    case 'MESSAGE_CREATED':
+                        this.createMessage(msgObj.data);
+                        break;
                 }
 
             } catch (e) {
@@ -57,6 +69,67 @@ const App = {
         };
 
         PanelSwitcher.open('register');
+    },
+
+    sendMessage () {
+        if (this.e.messageInp.value !== '') {
+            this.ws.send(JSON.stringify({
+                command: 'SEND_MESSAGE',
+                data: {
+                    roomId: this.currentRoom,
+                    body: this.e.messageInp.value,
+                }
+            }));
+            this.e.messageInp.value = '';
+        }
+    },
+
+    createMessage (message) {
+        this.e.messageList.appendChild(this.generateMessageTemplate(message));
+    },
+
+    generateMessageTemplate (message) {
+        // Message List Item
+        let li = document.createElement('li');
+        li.className = 'message';
+
+        // Message Header
+        const messageHeader = document.createElement('div');
+        messageHeader.className = 'message__header';
+
+        ['Created_By', 'User_Color', 'Created_At'].forEach(
+            key => {
+                const span = document.createElement('span');
+
+                if (key === 'User_Color') {
+                    span.style.backgroundColor = message[key];
+                } else if (key === 'Created_At') {
+                    span.textContent = moment(message[key]).fromNow();
+                } else {
+                    span.textContent = message[key];
+                }
+
+                // Set classname based on key
+                span.className = key.toLowerCase().replace('_', '-');
+
+                messageHeader.appendChild(span);
+            }
+        );
+
+        // Message Content
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message__content';
+
+        const messageBody = document.createElement('span')
+        messageBody.textContent = message.Body;
+
+        messageContent.appendChild(messageBody);
+
+        // Append to message list item and to message list
+        li.appendChild(messageHeader);
+        li.appendChild(messageContent);
+
+        return li;
     },
 
     listRooms () {
@@ -111,47 +184,7 @@ const App = {
 
         document.getElementById('roomName').textContent = `Room: ${room.Name}`;
 
-        messages.forEach(message => {
-            // Message List Item
-            let li = document.createElement('li');
-            li.className = 'message';
-
-            // Message Header
-            const messageHeader = document.createElement('div');
-            messageHeader.className = 'message__header';
-
-            ['Created_By', 'User_Color', 'Created_At'].forEach(
-                key => {
-                    const span = document.createElement('span');
-
-                    if (key === 'User_Color') {
-                        span.style.backgroundColor = message[key];
-                    } else {
-                        span.textContent = message[key];
-                    }
-                
-                    // Set classname based on key
-                    span.className = key.toLowerCase().replace('_', '-');
-
-                    messageHeader.appendChild(span);
-                }
-            );
-
-            // Message Content
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message__content';
-
-            const messageBody = document.createElement('span')
-            messageBody.textContent = message.Body;
-
-            messageContent.appendChild(messageBody);
-
-            // Append to message list item and to message list
-            li.appendChild(messageHeader);
-            li.appendChild(messageContent);
-
-            this.e.messageList.appendChild(li);
-        });
+        messages.forEach(message => this.e.messageList.appendChild(this.generateMessageTemplate(message)));
     }
 }
 

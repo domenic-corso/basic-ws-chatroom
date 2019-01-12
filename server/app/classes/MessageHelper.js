@@ -52,6 +52,30 @@ class MessageHelper extends Helper {
             })
         });
     }
+
+    getById (messageId) {
+        return new Promise((resolve, reject) => {
+            this.mysqlConnection.query(`
+                SELECT Message_ID
+                    ,Room_ID
+                    ,Created_By
+                    ,Body
+                    ,User_Color
+                    ,Created_At
+                FROM message m
+                WHERE Message_ID = ?
+            `, [messageId], (err, res) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                resolve(res.map(row => {
+                    return Object.assign({}, row);
+                })[0])
+            });
+        })
+    }
 };
 
 module.exports = MessageHelper;

@@ -10,7 +10,6 @@ class User {
         this.ws.on('message', message => {
             try {
                 const msgObj = JSON.parse(message);
-
                 switch (msgObj.command) {
                     case 'SET_DETAILS':
                         this.c_setDetails(msgObj.data);
@@ -19,7 +18,14 @@ class User {
                         this.c_sendMessage(Object.assign({}, msgObj.data, {
                             createdBy: this.name,
                             userColor: this.color
-                        }));
+                        })).then((messageId) => {
+                            this.messageHelper.getById(messageId).then(res => {
+                                this.ws.send(JSON.stringify({
+                                    command: 'MESSAGE_CREATED',
+                                    data: res
+                                }))
+                            });
+                        })
                         break;
                     case 'REQUEST_ROOMS':
                         this.roomHelper.getAll().then(rooms => {
@@ -56,14 +62,17 @@ class User {
         try {
             this.name = details.name || ''
             this.color = details.color || '#000000'
-    
-            console.log(`Name: ${this.name}`);
-            console.log(`Color: ${this.color}`);
         } catch(e) {}
     }
 
     c_sendMessage (message) {
-        this.messageHelper.insert(message);
+        return new Promise((resolve, reject) => {
+            this.messageHelper.insert(message).then((res) => {
+                if (res) {
+                    resolve(res);
+                }
+            }).catch(err => reject(err));
+        })
     }
 }
 
