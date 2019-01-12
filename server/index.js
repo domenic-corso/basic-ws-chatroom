@@ -6,6 +6,15 @@ const User = require('./app/classes/User');
 
 const wsServer = new WebSocket.Server({ port: 5000 });
 
+// Broadcast to all clients
+wsServer.broadcast = function broadcast(data) {
+    wsServer.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(data);
+        }
+    });
+};
+
 // Connect to MySQL 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -28,7 +37,7 @@ connection.connect((err) => {
     const messageHelper = new MessageHelper(connection);
         
     wsServer.on('connection', (ws) => {
-        const user = new User(ws, roomHelper, messageHelper);
+        const user = new User(ws, roomHelper, messageHelper, wsServer.broadcast);
 
         users.push(user);
     });

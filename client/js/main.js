@@ -5,7 +5,10 @@ const App = {
         inpName: null,
         inpColor: null,
         messageInp: null,
+        cRoomName: null,
+        cRoomDesc: null,
         btnSendMessage: null,
+        btnCreateRoom: null,
         roomList: null,
         messageList: null
     },
@@ -47,6 +50,12 @@ const App = {
         // Message Input
         this.e.messageInp = document.getElementById('messageInput');
 
+        // Room Creation El
+        this.e.cRoomName = document.getElementById("c-roomName");
+        this.e.cRoomDesc = document.getElementById("c-roomDescription");
+        this.e.btnCreateRoom = document.getElementById("btnCreateRoom");
+        this.e.btnCreateRoom.addEventListener('click', this.sendRoomCreate.bind(this));
+
         this.ws.onmessage = ({data}) => {
             try {
                 const msgObj = JSON.parse(data);
@@ -60,6 +69,9 @@ const App = {
                         break;
                     case 'MESSAGE_CREATED':
                         this.createMessage(msgObj.data);
+                        break;
+                    case 'ROOM_CREATED':
+                        this.createRoom(msgObj.data);
                         break;
                 }
 
@@ -81,6 +93,20 @@ const App = {
                 }
             }));
             this.e.messageInp.value = '';
+        }
+    },
+
+    sendRoomCreate () {
+        if (this.e.cRoomName.value !== '' && this.e.cRoomDesc.value !== '') {
+            this.ws.send(JSON.stringify({
+                command: 'CREATE_ROOM',
+                data: {
+                    name: this.e.cRoomName.value,
+                    description: this.e.cRoomDesc.value
+                }
+            }));
+            this.e.cRoomName.value = "";
+            this.e.cRoomDesc.value = "";
         }
     },
 
@@ -132,6 +158,28 @@ const App = {
         return li;
     },
 
+    createRoom(room) {
+        this.e.roomList.appendChild(this.generateRoomTemplate(room));
+    },
+
+    generateRoomTemplate(room) {
+        const row = document.createElement('tr');
+
+        row.addEventListener('click', () => {
+            this.currentRoom = room.Room_ID;
+            this.listMessages(room.Room_ID);
+
+        });
+
+        ['Name', 'Description', 'Message_Count', 'Created_By'].forEach(key => {
+            const td = document.createElement('td');
+            td.textContent = room[key];
+            row.appendChild(td);
+        });
+
+        return row;
+    },
+
     listRooms () {
         PanelSwitcher.open('roomList');
 
@@ -158,23 +206,7 @@ const App = {
             this.e.roomList.removeChild(this.e.roomList.firstElementChild);
         }
 
-        rooms.forEach(room => {
-            const row = document.createElement('tr');
-
-            row.addEventListener('click', () => {
-                this.currentRoom = room.Room_ID;
-                this.listMessages(room.Room_ID);
-
-            });
-            
-            ['Name', 'Description', 'Message_Count', 'Created_By'].forEach(key => {
-                const td = document.createElement('td');
-                td.textContent = room[key];
-                row.appendChild(td);
-            });
-
-            this.e.roomList.appendChild(row);
-        });
+        rooms.forEach(room => this.e.roomList.appendChild(this.generateRoomTemplate(room)));
     },
 
     populateMessages(room, messages) {
@@ -185,6 +217,12 @@ const App = {
         document.getElementById('roomName').textContent = `Room: ${room.Name}`;
 
         messages.forEach(message => this.e.messageList.appendChild(this.generateMessageTemplate(message)));
+
+        this.scrollToBottom(document.querySelector('.message-container'));
+    },
+
+    scrollToBottom (el) {
+        el.scrollTop = el.scrollHeight;
     }
 }
 

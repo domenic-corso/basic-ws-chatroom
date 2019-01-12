@@ -1,8 +1,9 @@
 class User {
-    constructor (ws, roomHelper, messageHelper) {
+    constructor (ws, roomHelper, messageHelper, broadcast) {
         this.ws = ws;
         this.roomHelper = roomHelper;
         this.messageHelper = messageHelper;
+        this.broadcast = broadcast;
 
         this.name = ''
         this.color = '#000000'
@@ -18,14 +19,26 @@ class User {
                         this.c_sendMessage(Object.assign({}, msgObj.data, {
                             createdBy: this.name,
                             userColor: this.color
-                        })).then((messageId) => {
+                        })).then(messageId => {
                             this.messageHelper.getById(messageId).then(res => {
-                                this.ws.send(JSON.stringify({
+                                this.broadcast(JSON.stringify({
                                     command: 'MESSAGE_CREATED',
                                     data: res
                                 }))
                             });
                         })
+                        break;
+                    case 'CREATE_ROOM':
+                        this.c_createRoom(Object.assign({}, msgObj.data, {
+                            createdBy: this.name
+                        })).then(roomId => {
+                            this.roomHelper.getById(roomId).then(res => {
+                                this.broadcast(JSON.stringify({
+                                    command: 'ROOM_CREATED',
+                                    data: res
+                                }))
+                            })
+                        });
                         break;
                     case 'REQUEST_ROOMS':
                         this.roomHelper.getAll().then(rooms => {
@@ -68,6 +81,16 @@ class User {
     c_sendMessage (message) {
         return new Promise((resolve, reject) => {
             this.messageHelper.insert(message).then((res) => {
+                if (res) {
+                    resolve(res);
+                }
+            }).catch(err => reject(err));
+        })
+    }
+
+    c_createRoom(room) {
+        return new Promise((resolve, reject) => {
+            this.roomHelper.insert(room).then((res) => {
                 if (res) {
                     resolve(res);
                 }
